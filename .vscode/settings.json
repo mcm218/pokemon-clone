@@ -1,0 +1,29 @@
+{
+    "dotnet.preferCSharpExtension": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/*.meta": true,
+        "**/*.asmdef": true,
+        "**/*.asset": true,
+        "**/*.unity": true,
+        "**/*.unitypackage": true,
+        "**/*.inputactions": true,
+        "Library/": true,
+        "obj/": true,
+        "Packages/": true,
+        "ProjectSettings/": true,
+        "Temp/": true,
+        "UserSettings/": true,
+        "Logs/": true,
+        "Assets/Settings/": true,
+        "Assets/Plugins/": true,
+        "Assets/Resources/": true,
+        "Assets/Scenes/": true
+    },
+    "dotnet.defaultSolution": "PokeRogueClone2.sln"
+}
