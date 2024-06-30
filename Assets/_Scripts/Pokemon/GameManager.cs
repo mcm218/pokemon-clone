@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Assertions;
 
-namespace _Scripts.Pokemon
-{
-    public class GameManager : PersistentSingleton<GameManager>
-    {
+namespace _Scripts.Pokemon {
+    public class GameManager : PersistentSingleton<GameManager> {
         public GameData gameData;
 
         [ReadOnly, SerializeField, Range(0f, 1f)]
@@ -33,59 +33,53 @@ namespace _Scripts.Pokemon
         [ReadOnly, SerializeField]
         private GameObject enemyPokemonParent;
 
-        public async Awaitable Load()
-        {
-            gameData = GameData.Load();
+        public async Awaitable Load() {
+            gameData = await GameData.Load();
             await BuildScene();
         }
 
-        public void Save()
-        {
-            gameData.Save();
+        public async Awaitable Save() {
+            await gameData.Save();
         }
 
-        protected override void Awake()
-        {
+        protected override void Awake() {
             base.Awake();
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-            Load();
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+            Task.Run(Init);
         }
 
-        public void StartLoading()
-        {
-            isLoading = isLoadingComplete = false;
+        private async Awaitable Init() {
+            await Load();
+            await Save();
+        }
+
+        public void StartLoading() {
+            isLoading       = isLoadingComplete = false;
             loadingProgress = 0;
         }
 
-        public void FinishLoading()
-        {
+        public void FinishLoading() {
             isLoadingComplete = true;
         }
 
-        public void StopLoading()
-        {
+        public void StopLoading() {
             isLoading = false;
         }
 
         [Button]
-        private void ClearScene()
-        {
-#if UNITY_EDITOR
-            if (playerPokemonParent != null)
-            {
+        private void ClearScene() {
+        #if UNITY_EDITOR
+            if (playerPokemonParent != null) {
                 playerPokemonParent.DestroyChildrenImmediate();
                 DestroyImmediate(playerPokemonParent);
                 playerPokemonParent = null;
             }
-            if (enemyPokemonParent != null)
-            {
+            if (enemyPokemonParent != null) {
                 enemyPokemonParent.DestroyChildrenImmediate();
                 DestroyImmediate(enemyPokemonParent);
                 enemyPokemonParent = null;
             }
-#endif
-#if !UNITY_EDITOR
+        #endif
+        #if !UNITY_EDITOR
             if (playerPokemonParent != null)
             {
                 playerPokemonParent.DestroyChildren();
@@ -98,29 +92,27 @@ namespace _Scripts.Pokemon
                 Destroy(enemyPokemonParent);
                 enemyPokemonParent = null;
             }
-#endif
+        #endif
+            Assert.IsNull(playerPokemonParent);
+            Assert.IsNull(enemyPokemonParent);
         }
 
         [Button]
-        private async Awaitable BuildScene()
-        {
+        private async Awaitable BuildScene() {
             StartLoading();
 
             ClearScene();
 
-            if (playerPokemonParent == null)
-            {
-                playerPokemonParent = new GameObject();
-                playerPokemonParent.name = "Player Pokemon";
+            if (playerPokemonParent == null) {
+                playerPokemonParent = new GameObject {
+                    name = "Player Pokemon"
+                };
             }
-            if (enemyPokemonParent == null)
-            {
-                enemyPokemonParent = new GameObject();
-                enemyPokemonParent.name = "Enemy Pokemon";
+            if (enemyPokemonParent == null) {
+                enemyPokemonParent = new GameObject {
+                    name = "Enemy Pokemon"
+                };
             }
-
-            // Instantiate(playerPokemonParent);
-            // Instantiate(enemyPokemonParent);
 
             if (gameData.playerPokemon.Count == 0) {
                 gameData.playerPokemon.Add(
@@ -131,14 +123,9 @@ namespace _Scripts.Pokemon
                 );
             }
             gameData
-                .playerPokemon.ConvertAll((pokemon) => InstantiatePokemon(pokemon, playerPokemonParent))
-                .ForEach(controller =>
-                {
-                    // Instantiate(controller);
-                });
+                .playerPokemon.ForEach((pokemon) => InstantiatePokemon(pokemon, playerPokemonParent));
 
-            if (gameData.enemyPokemon.Count == 0)
-            {
+            if (gameData.enemyPokemon.Count == 0) {
                 gameData.enemyPokemon.Add(
                     GeneratePokemon(
                         ScriptableObject.CreateInstance<PokemonData>(),
@@ -147,11 +134,7 @@ namespace _Scripts.Pokemon
                 );
             }
             gameData
-                .enemyPokemon.ConvertAll((pokemon) => InstantiatePokemon(pokemon, enemyPokemonParent))
-                .ForEach(controller =>
-                {
-                    // Instantiate(controller);
-                });
+                .enemyPokemon.ForEach((pokemon) => InstantiatePokemon(pokemon, enemyPokemonParent));
             await Awaitable.WaitForSecondsAsync(5);
 
             FinishLoading();
@@ -164,42 +147,36 @@ namespace _Scripts.Pokemon
             return controller;
         }
 
-        public Pokemon GeneratePokemon(PokemonData data, GameObject parent)
-        {
+        public Pokemon GeneratePokemon(PokemonData data, GameObject parent) {
             string[] pokemonNames = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" };
-            data.name = pokemonNames[(int)Mathf.Floor(UnityEngine.Random.Range(0f, 4f))];
+            data.name     = pokemonNames[(int)Mathf.Floor(UnityEngine.Random.Range(0f, 4f))];
             data.nickname = data.name;
 
-            Pokemon pokemon = new Pokemon
-            {
-                data = data,
-                level = 5,
-                hp = 20,
-                IVs = Stats.RandomIVs(),
-                EVs = new Stats(),
-                attackBuff = 0,
-                defenseBuff = 0,
-                speedBuff = 0,
-                specialBuff = 0,
-                moves = new List<IMove>(),
+            Pokemon pokemon = new Pokemon {
+                data            = data,
+                level           = 5,
+                hp              = 20,
+                IVs             = Stats.RandomIVs(),
+                EVs             = new Stats(),
+                attackBuff      = 0,
+                defenseBuff     = 0,
+                speedBuff       = 0,
+                specialBuff     = 0,
+                moves           = new List<IMove>(),
                 statusCondition = StatusCondition.None
             };
             return pokemon;
         }
 
-        private void Update()
-        {
-            if (isLoading)
-            {
-                if (!isLoadingComplete && loadingProgress <= loadingPausePercentage)
-                {
+        private void Update() {
+            if (isLoading) {
+                if (!isLoadingComplete && loadingProgress <= loadingPausePercentage) {
                     loadingProgress +=
                         Time.deltaTime
                         * (isLoadingComplete ? loadingCompletePercentPerS : loadingPercentPerS);
                 }
 
-                if (loadingProgress >= 1f)
-                {
+                if (loadingProgress >= 1f) {
                     StopLoading();
                 }
             }
