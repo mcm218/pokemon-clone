@@ -74,11 +74,13 @@ namespace _Scripts.Pokemon
 #if UNITY_EDITOR
             if (playerPokemonParent != null)
             {
+                playerPokemonParent.DestroyChildrenImmediate();
                 DestroyImmediate(playerPokemonParent);
                 playerPokemonParent = null;
             }
             if (enemyPokemonParent != null)
             {
+                enemyPokemonParent.DestroyChildrenImmediate();
                 DestroyImmediate(enemyPokemonParent);
                 enemyPokemonParent = null;
             }
@@ -86,11 +88,13 @@ namespace _Scripts.Pokemon
 #if !UNITY_EDITOR
             if (playerPokemonParent != null)
             {
+                playerPokemonParent.DestroyChildren();
                 Destroy(playerPokemonParent);
                 playerPokemonParent = null;
             }
             if (enemyPokemonParent != null)
             {
+                enemyPokemonParent.DestroyChildren();
                 Destroy(enemyPokemonParent);
                 enemyPokemonParent = null;
             }
@@ -115,11 +119,10 @@ namespace _Scripts.Pokemon
                 enemyPokemonParent.name = "Enemy Pokemon";
             }
 
-            Instantiate(playerPokemonParent);
-            Instantiate(enemyPokemonParent);
+            // Instantiate(playerPokemonParent);
+            // Instantiate(enemyPokemonParent);
 
-            if (gameData.playerPokemon.Count == 0)
-            {
+            if (gameData.playerPokemon.Count == 0) {
                 gameData.playerPokemon.Add(
                     GeneratePokemon(
                         ScriptableObject.CreateInstance<PokemonData>(),
@@ -127,16 +130,12 @@ namespace _Scripts.Pokemon
                     )
                 );
             }
-            else
-            {
-                gameData
-                    .playerPokemon.ConvertAll(InstantiatePokemon)
-                    .ForEach(controller =>
-                    {
-                        playerPokemonParent.transform.SetParent(controller.transform);
-                        Instantiate(controller);
-                    });
-            }
+            gameData
+                .playerPokemon.ConvertAll((pokemon) => InstantiatePokemon(pokemon, playerPokemonParent))
+                .ForEach(controller =>
+                {
+                    // Instantiate(controller);
+                });
 
             if (gameData.enemyPokemon.Count == 0)
             {
@@ -147,29 +146,21 @@ namespace _Scripts.Pokemon
                     )
                 );
             }
-            else
-            {
-                gameData
-                    .enemyPokemon.ConvertAll(InstantiatePokemon)
-                    .ForEach(controller =>
-                    {
-                        enemyPokemonParent.transform.SetParent(controller.transform);
-                        Instantiate(controller);
-                    });
-            }
-
+            gameData
+                .enemyPokemon.ConvertAll((pokemon) => InstantiatePokemon(pokemon, enemyPokemonParent))
+                .ForEach(controller =>
+                {
+                    // Instantiate(controller);
+                });
             await Awaitable.WaitForSecondsAsync(5);
 
             FinishLoading();
         }
 
-        public PokemonController InstantiatePokemon(Pokemon pokemon)
-        {
-            GameObject pokemonObject = new GameObject();
-            pokemonObject.transform.SetParent(enemyPokemonParent.transform);
-            PokemonController controller = pokemonObject.AddComponent<PokemonController>();
+        public PokemonController InstantiatePokemon(Pokemon pokemon, GameObject parent) {
+            GameObject        pokemonObject = parent.CreateChild(pokemon.data.nickname ?? pokemon.data.name);
+            PokemonController controller    = pokemonObject.GetOrAdd<PokemonController>();
             controller.pokemon = pokemon;
-            pokemonObject.name = controller.pokemon.data.nickname ?? controller.pokemon.data.name;
             return controller;
         }
 
@@ -177,8 +168,7 @@ namespace _Scripts.Pokemon
         {
             string[] pokemonNames = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" };
             data.name = pokemonNames[(int)Mathf.Floor(UnityEngine.Random.Range(0f, 4f))];
-            GameObject pokemonObject = new GameObject();
-            pokemonObject.transform.SetParent(parent.transform);
+            data.nickname = data.name;
 
             Pokemon pokemon = new Pokemon
             {
@@ -194,7 +184,6 @@ namespace _Scripts.Pokemon
                 moves = new List<IMove>(),
                 statusCondition = StatusCondition.None
             };
-            pokemonObject.AddComponent<PokemonController>().pokemon = pokemon;
             return pokemon;
         }
 
