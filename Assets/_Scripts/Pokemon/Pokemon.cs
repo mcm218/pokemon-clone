@@ -13,7 +13,7 @@ namespace _Scripts.Pokemon {
 
         public int hp = 1;
 
-        public Stats IVs = Stats.RandomIVs();
+        public Stats IVs = new Stats();
 
         public Stats EVs = new Stats();
 
