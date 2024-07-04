@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace _Scripts.Pokemon {
     [Serializable]
     public class Pokemon
     {
-        [SerializeField]
-        public PokemonData data;
+        [FormerlySerializedAs("data"),SerializeField]
+        public PokemonData2 data2;
 
         public int level = 1;
 
@@ -32,7 +33,7 @@ namespace _Scripts.Pokemon {
 
         public int Level => level;
 
-        public PokemonType Type => data.type;
+        public PokemonType Type => data2.type;
 
 
         public int Attack  => GetStatWithBuff(StatType.Attack,  attackBuff);
@@ -45,7 +46,7 @@ namespace _Scripts.Pokemon {
         {
             if (stat == StatType.HP)
             {
-                return (2 * data.stats.hp + IVs.hp + EVs.hp / 4) * level / 100 + level + 10;
+                return (2 * data2.stats.hp + IVs.hp + EVs.hp / 4) * level / 100 + level + 10;
             }
 
             int statValue = 0;
@@ -54,22 +55,22 @@ namespace _Scripts.Pokemon {
             switch (stat)
             {
                 case StatType.Attack:
-                    statValue = data.stats.attack;
+                    statValue = data2.stats.attack;
                     ivValue   = IVs.attack;
                     evValue   = EVs.attack;
                     break;
                 case StatType.Defense:
-                    statValue = data.stats.defense;
+                    statValue = data2.stats.defense;
                     ivValue   = IVs.defense;
                     evValue   = EVs.defense;
                     break;
                 case StatType.Speed:
-                    statValue = data.stats.speed;
+                    statValue = data2.stats.speed;
                     ivValue   = IVs.speed;
                     evValue   = EVs.speed;
                     break;
                 case StatType.Special:
-                    statValue = data.stats.special;
+                    statValue = data2.stats.special;
                     ivValue   = IVs.special;
                     evValue   = EVs.special;
                     break;
@@ -79,7 +80,7 @@ namespace _Scripts.Pokemon {
 
         [Button]
         public void ResetHP() {
-            baseHP = (2 * data.stats.hp + IVs.hp + EVs.hp / 4) * level / 100 + level + 10;
+            baseHP = (2 * data2.stats.hp + IVs.hp + EVs.hp / 4) * level / 100 + level + 10;
             currentHP = baseHP;
         }
 
@@ -87,8 +88,8 @@ namespace _Scripts.Pokemon {
         public void ResetMoves() {
             moves = new List<BaseMove>();
             for (int i = 0; i < 4; i++) {
-                if (data.learnableMoves.Count > i) {
-                    moves.Add(data.learnableMoves[i]);
+                if (data2.learnableMoves.Count > i) {
+                    moves.Add(data2.learnableMoves[i]);
                 }
             }
         }
