@@ -15,7 +15,7 @@ namespace _Scripts.Pokemon
 
 
     [Serializable, CreateAssetMenu(fileName = "NewPokemonData", menuName = "Pokemon Data")]
-    public class PokemonData2 : SerializedScriptableObject
+    public class PokemonData : SerializedScriptableObject
     {
         public     int         id       = 1;
         public new string      name     = "Pokemon";

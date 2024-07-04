@@ -117,7 +117,7 @@ namespace _Scripts.Pokemon {
             if (gameData.playerPokemon.Count == 0) {
                 gameData.playerPokemon.Add(
                     GeneratePokemon(
-                        ScriptableObject.CreateInstance<PokemonData2>()
+                        ScriptableObject.CreateInstance<PokemonData>()
                     )
                 );
             }
@@ -127,7 +127,7 @@ namespace _Scripts.Pokemon {
             if (gameData.enemyPokemon.Count == 0) {
                 gameData.enemyPokemon.Add(
                     GeneratePokemon(
-                        ScriptableObject.CreateInstance<PokemonData2>()
+                        ScriptableObject.CreateInstance<PokemonData>()
                     )
                 );
             }
@@ -139,10 +139,10 @@ namespace _Scripts.Pokemon {
         }
 
         public PokemonController InstantiatePokemon(Pokemon pokemon, GameObject parent, bool isPlayer = false){
-            GameObject        pokemonObject = parent.CreateChild(pokemon.data2.nickname ?? pokemon.data2.name);
+            GameObject        pokemonObject = parent.CreateChild(pokemon.data.nickname ?? pokemon.data.name);
             PokemonController controller    = pokemonObject.GetOrAdd<PokemonController>();
             controller.pokemon = pokemon;
-            pokemonObject.AddComponent<SpriteRenderer>().sprite = pokemon.data2.sprite;
+            pokemonObject.AddComponent<SpriteRenderer>().sprite = pokemon.data.sprite;
             if (isPlayer) {
                 pokemonObject.transform.position = new Vector3(-5, -1, 0);
                 pokemonObject.transform.localScale = new Vector3(-1, 1, 1);
@@ -153,19 +153,19 @@ namespace _Scripts.Pokemon {
             return controller;
         }
 
-        public Pokemon GeneratePokemon(PokemonData2 data2) {
+        public Pokemon GeneratePokemon(PokemonData data) {
             string[] pokemonNames = { "Pikachu" };
-            data2.name     = pokemonNames[(int)Mathf.Floor(UnityEngine.Random.Range(0f, 4f))];
-            data2.nickname = data2.name;
+            data.name     = pokemonNames[(int)Mathf.Floor(UnityEngine.Random.Range(0f, 4f))];
+            data.nickname = data.name;
             List<BaseMove> moves = new List<BaseMove>();
             for (int i = 0; i < 4; i++) {
-                if (data2.learnableMoves.Count > i) {
-                    moves.Add(data2.learnableMoves[i]);
+                if (data.learnableMoves.Count > i) {
+                    moves.Add(data.learnableMoves[i]);
                 }
             }
 
             Pokemon pokemon = new Pokemon {
-                data2            = data2,
+                data            = data,
                 level           = 5,
                 IVs             = Stats.RandomIVs(),
                 EVs             = new Stats(),
