@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace _Scripts.Pokemon {
     [Serializable, CreateAssetMenu(fileName = "NewStandardDamageMove", menuName = "Moves/Standard Damage Move")]
-    public class StandardDamageMove : BaseMove, IMove
+    public class StandardDamageMove : BaseMove
     {
         protected new MoveType moveType = MoveType.StandardDamage;
 
-        public void Use(Pokemon source, Pokemon target)
+        public override void Use(Pokemon source, Pokemon target)
         {
             MoveCategory category = type.GetMoveCategory();
             int          attack   = category == MoveCategory.Physical ? source.Attack : source.Special;

@@ -6,6 +6,6 @@ namespace _Scripts.Pokemon {
     {
         public Pokemon pokemon;
 
-        public List<IMove> Moves => pokemon.moves;
+        public List<BaseMove> Moves => pokemon.moves;
     }
 }
