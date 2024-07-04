@@ -117,54 +117,67 @@ namespace _Scripts.Pokemon {
             if (gameData.playerPokemon.Count == 0) {
                 gameData.playerPokemon.Add(
                     GeneratePokemon(
-                        ScriptableObject.CreateInstance<PokemonData>(),
-                        playerPokemonParent
+                        ScriptableObject.CreateInstance<PokemonData>()
                     )
                 );
             }
             gameData
-                .playerPokemon.ForEach((pokemon) => InstantiatePokemon(pokemon, playerPokemonParent));
+                .playerPokemon.ForEach((pokemon) => InstantiatePokemon(pokemon, playerPokemonParent, true));
 
             if (gameData.enemyPokemon.Count == 0) {
                 gameData.enemyPokemon.Add(
                     GeneratePokemon(
-                        ScriptableObject.CreateInstance<PokemonData>(),
-                        enemyPokemonParent
+                        ScriptableObject.CreateInstance<PokemonData>()
                     )
                 );
             }
             gameData
-                .enemyPokemon.ForEach((pokemon) => InstantiatePokemon(pokemon, enemyPokemonParent));
+                .enemyPokemon.ForEach((pokemon) => InstantiatePokemon(pokemon, enemyPokemonParent, false));
             await Awaitable.WaitForSecondsAsync(5);
 
             FinishLoading();
         }
 
-        public PokemonController InstantiatePokemon(Pokemon pokemon, GameObject parent) {
+        public PokemonController InstantiatePokemon(Pokemon pokemon, GameObject parent, bool isPlayer = false){
             GameObject        pokemonObject = parent.CreateChild(pokemon.data.nickname ?? pokemon.data.name);
             PokemonController controller    = pokemonObject.GetOrAdd<PokemonController>();
             controller.pokemon = pokemon;
+            pokemonObject.AddComponent<SpriteRenderer>().sprite = pokemon.data.sprite;
+            if (isPlayer) {
+                pokemonObject.transform.position = new Vector3(-5, -1, 0);
+                pokemonObject.transform.localScale = new Vector3(-1, 1, 1);
+            } else {
+                pokemonObject.transform.position = new Vector3(5, 3.5f, 0);
+                
+            }
             return controller;
         }
 
-        public Pokemon GeneratePokemon(PokemonData data, GameObject parent) {
-            string[] pokemonNames = { "Bulbasaur", "Charmander", "Squirtle", "Pikachu" };
+        public Pokemon GeneratePokemon(PokemonData data) {
+            string[] pokemonNames = { "Pikachu" };
             data.name     = pokemonNames[(int)Mathf.Floor(UnityEngine.Random.Range(0f, 4f))];
             data.nickname = data.name;
+            List<BaseMove> moves = new List<BaseMove>();
+            for (int i = 0; i < 4; i++) {
+                if (data.learnableMoves.Count > i) {
+                    moves.Add(data.learnableMoves[i]);
+                }
+            }
 
             Pokemon pokemon = new Pokemon {
                 data            = data,
                 level           = 5,
-                hp              = 20,
                 IVs             = Stats.RandomIVs(),
                 EVs             = new Stats(),
                 attackBuff      = 0,
                 defenseBuff     = 0,
                 speedBuff       = 0,
                 specialBuff     = 0,
-                moves           = new List<IMove>(),
+                moves           = moves,
                 statusCondition = StatusCondition.None
             };
+            
+            
             return pokemon;
         }
 
