@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace _Scripts.Pokemon {
     public static class PokemonExtensions
     {
@@ -13,6 +16,24 @@ namespace _Scripts.Pokemon {
         public static int GetMoveDamage(this Pokemon pokemon, int level, int power, int attack, int defense, float modifier)
         {
             return (int)((2 * level * power * attack / (250 * defense) + 2) * modifier);
+        }
+        
+        public static GameManager SafeGetManager() {
+            GameManager instance = GameManager.Instance;
+            if (!instance) { throw new System.Exception("GameManager instance not found"); }
+            return instance;
+        }
+        
+        /// <summary>
+        /// Selects the move with the highest priority and then the highest speed stat
+        /// </summary>
+        /// <param name="pokemonList"></param>
+        /// <returns></returns>
+        public static SelectedMove SelectBySpeed(this IList<SelectedMove> pokemonList) {
+            return pokemonList
+                   .OrderByDescending(x => x.move.priority)
+                   .ThenByDescending(p => p.source.pokemon.Speed)
+                   .First();
         }
     }
 }

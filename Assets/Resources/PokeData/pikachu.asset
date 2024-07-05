@@ -21,15 +21,22 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes: []
+  id: 25
   name: pikachu
   nickname: pikachu
-  sprite: {fileID: 21300000, guid: 6279024f7e6ab4ebc9c7f2f9b6f08cf0, type: 3}
-  type: 3
   stats:
     hp: 35
     attack: 55
     defense: 30
     speed: 50
     special: 90
+  sprite: {fileID: 21300000, guid: 6279024f7e6ab4ebc9c7f2f9b6f08cf0, type: 3}
+  type: 3
+  EVsDrop:
+    hp: 0
+    attack: 0
+    defense: 0
+    speed: 2
+    special: 0
   learnableMoves:
   - {fileID: 11400000, guid: 54763f8b8b65f480db789a97d6d1032b, type: 2}
