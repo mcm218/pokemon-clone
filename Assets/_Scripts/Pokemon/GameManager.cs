@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Sirenix.OdinInspector;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -33,6 +36,9 @@ namespace _Scripts.Pokemon {
         [ReadOnly, SerializeField]
         private GameObject enemyPokemonParent;
 
+        private ObservableList<SelectedMove> playerSelectedMoves = new ObservableList<SelectedMove>();
+        private ObservableList<SelectedMove> enemySelectedMoves  = new ObservableList<SelectedMove>();
+
         public async Awaitable Load() {
             gameData = await GameData.Load();
             await BuildScene();
@@ -50,6 +56,18 @@ namespace _Scripts.Pokemon {
         private async Awaitable Init() {
             await Load();
             await Save();
+            
+            playerSelectedMoves.ListChanged += (sender, args) => {
+                if (AreAllMovesSelected()) {
+                    RunTurn();
+                }
+            };
+            
+            enemySelectedMoves.ListChanged += (sender, args) => {
+                if (AreAllMovesSelected()) {
+                    RunTurn();
+                }
+            };
         }
 
         public void StartLoading() {
@@ -194,5 +212,73 @@ namespace _Scripts.Pokemon {
                 }
             }
         }
+
+        [CanBeNull]
+        public async Awaitable<PokemonController> FindTarget(PokemonController source) {
+            bool isPlayerPokemon = gameData.playerSelectedPokemon.Contains(source.pokemon);
+            
+            // Get the target list and target parent
+            var targetPokemonList = isPlayerPokemon ? gameData.enemySelectedPokemon : gameData.playerSelectedPokemon;
+            var targetParent = isPlayerPokemon ? enemyPokemonParent : playerPokemonParent;
+            if (targetPokemonList.Count == 0 || targetParent.OrNull()) {
+                return null;
+            }
+            
+            // Find the target
+            var target = targetPokemonList.First();
+            
+            // Find the target controller
+            return targetParent.GetComponentsInChildren<PokemonController>().First((controller) => controller.pokemon == target).OrNull();
+        }
+        
+        public bool RegisterMove(PokemonController source, BaseMove move, PokemonController target) {
+            bool isPlayerPokemon = gameData.playerSelectedPokemon.Contains(source.pokemon);
+            // Get the target list and target parent
+            var targetList = isPlayerPokemon ? playerSelectedMoves : enemySelectedMoves;
+            var targetPokemonList = isPlayerPokemon ? gameData.playerSelectedPokemon : gameData.enemySelectedPokemon;
+            
+            if (targetList.Count >= targetPokemonList.Count) {
+                return false;
+            }
+            
+            targetList.Add(new SelectedMove {
+                source = source,
+                target = target,
+                move = move
+            });
+            
+            return true;
+        }
+        
+        public bool AreAllMovesSelected() {
+            return playerSelectedMoves.Count == gameData.playerSelectedPokemon.Count
+                   && enemySelectedMoves.Count == gameData.enemySelectedPokemon.Count;
+        }
+        
+        public void ResetMoves() {
+            playerSelectedMoves.Clear();
+            enemySelectedMoves.Clear();
+        }
+
+        public void RunTurn() {
+            List<SelectedMove> allSelectedMoves = new List<SelectedMove>();
+            allSelectedMoves.AddRange(playerSelectedMoves);
+            allSelectedMoves.AddRange(enemySelectedMoves);
+
+            while (allSelectedMoves.Count > 0) {
+                SelectedMove selectedMove = allSelectedMoves.SelectBySpeed();
+                selectedMove.move.Use(selectedMove.source.pokemon, selectedMove.target.pokemon);
+                allSelectedMoves.Remove(selectedMove);
+            }
+            
+            
+            ResetMoves();
+        }
+    }
+
+    public class SelectedMove {
+        public PokemonController source;
+        public PokemonController target;
+        public BaseMove move;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
@@ -7,10 +8,12 @@ using UnityEngine;
 // MVC =
 // View -> GameObject
 // Controller -> MonoBehaviour -> PokemonController
-// Model -> ScriptableObject -> Pokémon
+// Model -> ScriptableObject -> Pokemon
 
 namespace _Scripts.Pokemon
 {
+
+
     [Serializable, CreateAssetMenu(fileName = "NewPokemonData", menuName = "Pokemon Data")]
     public class PokemonData : SerializedScriptableObject
     {
@@ -25,4 +28,6 @@ namespace _Scripts.Pokemon
 
         public List<BaseMove> learnableMoves = new List<BaseMove>();
     }
+
+
 }
