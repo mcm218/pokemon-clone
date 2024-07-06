@@ -8,7 +8,15 @@ namespace _Scripts.Pokemon {
     {
         public Pokemon pokemon;
 
-        public List<BaseMove> Moves => pokemon.moves;
+        public ObservableList<BaseMove> Moves = new ObservableList<BaseMove>();
+
+
+        private void Awake() {
+            if (pokemon == null) {
+                throw new Exception("Pokemon is null");
+            }
+            Moves.AddRange(pokemon.moves);
+        }
 
         public async Awaitable OnMoveSelect(BaseMove selectedmove) {
             var gameManager = GameManager.Instance;
@@ -19,7 +27,6 @@ namespace _Scripts.Pokemon {
                 throw new Exception("Target not found");
             }
             gameManager.RegisterMove(this, selectedmove, target);
-
         }
     }
 }
