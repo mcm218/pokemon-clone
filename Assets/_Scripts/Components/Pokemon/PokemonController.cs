@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace _Scripts.Pokemon {
-    public class PokemonController : SerializedMonoBehaviour
+    public class PokemonController : MonoBehaviour
     {
         public Pokemon pokemon;
 
@@ -16,6 +16,14 @@ namespace _Scripts.Pokemon {
                 throw new Exception("Pokemon is null");
             }
             Moves.AddRange(pokemon.moves);
+        }
+        
+        public void OnTurnStart() {
+            var view = GetComponent<PokemonView>();
+            if (!view.OrNull()) {
+                throw new Exception("PokemonView is null");
+            }
+            view.Show();
         }
 
         public async Awaitable OnMoveSelect(BaseMove selectedmove) {

@@ -2,21 +2,30 @@ using System;
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 namespace _Scripts.Pokemon {
-    public class PokemonView : SerializedMonoBehaviour {
+    public class PokemonView : MonoBehaviour {
         [FormerlySerializedAs("pokemonController")] public PokemonController controller;
+        
+        public GameObject movePanel;
         
         public List<MoveButtonUI> moveButtons = new List<MoveButtonUI>();
 
+        public void Show() {
+            movePanel.SetActive(true);
+        }
+        
+        public void Hide() {
+            movePanel.SetActive(false);
+        }
+
         private void Awake() {
+            Hide();
             controller = GetComponent<PokemonController>();
         }
 
+        // TODO: Should this be move to the controller class?
         private void Start() {
             for (int index = 0; index < controller.Moves.Count; index++) {
                 var move = controller.Moves[index];
@@ -32,39 +41,5 @@ namespace _Scripts.Pokemon {
             controller.OnMoveSelect(selectedMove);
         }
     }
-    
-    public class MoveButtonUI : SerializedMonoBehaviour {
-        private BaseMove move;
-        
-        public Button button;
-        private ButtonHover buttonHover;
 
-        private void Awake() {
-            button = GetComponent<Button>();
-            buttonHover = GetComponent<ButtonHover>();
-            if (buttonHover == null) {
-                buttonHover = gameObject.AddComponent<ButtonHover>();
-            }
-        }
-        
-        public void SetMove(BaseMove move, UnityAction onMoveSelect,UnityAction<PointerEventData> onPointerEnter, UnityAction<PointerEventData> onPointerExit) {
-            this.move = move;
-            button.onClick.AddListener(onMoveSelect);
-            buttonHover.onPointerEnter = onPointerEnter;
-            buttonHover.onPointerExit  = onPointerExit;
-        }
-    }
-    
-    public class ButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
-        public UnityAction<PointerEventData> onPointerEnter;
-        public UnityAction<PointerEventData> onPointerExit;
-        
-        public void OnPointerEnter(PointerEventData eventData) {
-            onPointerEnter.Invoke(eventData);
-        }
-
-        public void OnPointerExit(PointerEventData eventData) {
-            onPointerExit.Invoke(eventData);
-        }
-    }
 }
